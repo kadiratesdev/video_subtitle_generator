@@ -76,7 +76,7 @@ def cmd_status(_: argparse.Namespace) -> int:
 
 
 def build_parser() -> argparse.ArgumentParser:
-    parser = argparse.ArgumentParser(description="El Clon altyazı platformu")
+    parser = argparse.ArgumentParser(description="GenSub altyazı platformu")
     sub = parser.add_subparsers(dest="command", required=True)
 
     serve = sub.add_parser("serve", help="Web arayüzünü başlat")

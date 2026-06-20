@@ -72,7 +72,10 @@ def fetch_remote_episodes(
     *,
     timeout: float = 30.0,
 ) -> list[Episode]:
-    base = remote_url if remote_url.endswith("/") else f"{remote_url}/"
+    base = (remote_url or "").strip()
+    if not base:
+        return []
+    base = base if base.endswith("/") else f"{base}/"
     try:
         with httpx.Client(timeout=timeout, follow_redirects=True) as client:
             response = client.get(base)

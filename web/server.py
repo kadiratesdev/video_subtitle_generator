@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""FastAPI web server for El Clon subtitle platform."""
+"""FastAPI web server for GenSub subtitle platform."""
 from __future__ import annotations
 
 import mimetypes
@@ -30,6 +30,10 @@ class RebuildBody(BaseModel):
     autoStart: bool = True
 
 
+class GroqKeyBody(BaseModel):
+    apiKey: str
+
+
 def _candidate_is_under(candidate: Path, root: Path) -> bool:
     try:
         candidate.relative_to(root)
@@ -39,7 +43,7 @@ def _candidate_is_under(candidate: Path, root: Path) -> bool:
 
 
 def create_app(config: Config) -> FastAPI:
-    app = FastAPI(title="El Clon — Türkçe Altyazı", version="2.0.0")
+    app = FastAPI(title="GenSub — Türkçe Altyazı", version="2.0.0")
     jobs = JobManager(config)
 
     if STATIC_DIR.is_dir():
@@ -57,6 +61,9 @@ def create_app(config: Config) -> FastAPI:
         if not candidate.is_file():
             raise HTTPException(status_code=404, detail="Dosya bulunamadı")
         return candidate
+
+    def _has_groq_key() -> bool:
+        return bool(jobs.config.groq_api_key)
 
     @app.on_event("startup")
     async def startup() -> None:
@@ -84,7 +91,7 @@ def create_app(config: Config) -> FastAPI:
 
     @app.post("/api/episodes/{episode_id}/process")
     async def api_process_episode(episode_id: str):
-        if not config.groq_api_key:
+        if not _has_groq_key():
             raise HTTPException(
                 status_code=503,
                 detail="GROQ_API_KEY tanımlı değil. .env dosyasını kontrol edin.",
@@ -96,7 +103,7 @@ def create_app(config: Config) -> FastAPI:
 
     @app.post("/api/episodes/{episode_id}/rebuild")
     async def api_rebuild_episode(episode_id: str, body: RebuildBody | None = None):
-        if not config.groq_api_key:
+        if not _has_groq_key():
             raise HTTPException(
                 status_code=503,
                 detail="GROQ_API_KEY tanımlı değil. .env dosyasını kontrol edin.",
@@ -121,7 +128,26 @@ def create_app(config: Config) -> FastAPI:
             "currentJob": jobs.current_job(),
             "videoBaseUrl": settings["remoteUrl"],
             "catalog": settings,
-            "hasGroqKey": bool(config.groq_api_key),
+            "hasGroqKey": _has_groq_key(),
+        }
+
+    @app.post("/api/settings/groq-key")
+    async def api_save_groq_key(body: GroqKeyBody):
+        from env_settings import save_groq_api_key
+
+        try:
+            path = save_groq_api_key(body.apiKey)
+        except ValueError as exc:
+            raise HTTPException(status_code=400, detail=str(exc)) from exc
+        except OSError as exc:
+            raise HTTPException(status_code=500, detail=f".env yazılamadı: {exc}") from exc
+
+        key = body.apiKey.strip()
+        jobs.update_groq_api_key(key)
+        return {
+            "ok": True,
+            "hasGroqKey": True,
+            "envPath": str(path),
         }
 
     @app.get("/api/catalog/settings")

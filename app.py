@@ -24,7 +24,7 @@ def _open_browser(host: str, port: int) -> None:
 
 
 def main() -> int:
-    parser = argparse.ArgumentParser(description="El Clon Türkçe Altyazı Platformu")
+    parser = argparse.ArgumentParser(description="GenSub Türkçe Altyazı Platformu")
     parser.add_argument("--host", default=None, help="Dinleme adresi")
     parser.add_argument("--port", type=int, default=None, help="Port")
     parser.add_argument("--no-browser", action="store_true", help="Tarayıcıyı otomatik açma")
@@ -49,9 +49,13 @@ def main() -> int:
     app = create_app(config)
 
     print("=" * 52)
-    print("  El Clon — Türkçe Altyazı Platformu")
+    print("  GenSub — Türkçe Altyazı Platformu")
     print("=" * 52)
-    print(f"  Video kaynağı: {config.video_base_url}")
+    if config.video_source == "local":
+        print(f"  Video kaynağı: yerel — {config.local_video_dir}")
+    else:
+        src = config.video_base_url or "(URL tanımlı değil)"
+        print(f"  Video kaynağı: uzak — {src}")
     print(f"  Yerel adres:   http://127.0.0.1:{port}")
     if host in ("0.0.0.0", "::"):
         try:

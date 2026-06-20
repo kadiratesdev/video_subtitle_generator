@@ -9,27 +9,91 @@ function shouldPrepare() {
 
 let pollTimer = null;
 let episodeData = null;
+let playerBound = false;
+
+function setPanelVisible(el, visible) {
+  if (!el) return;
+  el.hidden = !visible;
+  el.classList.toggle("hidden", !visible);
+}
 
 function showPanel(name) {
-  document.getElementById("processing-panel").hidden = name !== "processing";
-  document.getElementById("player-panel").hidden = name !== "player";
-  document.getElementById("error-panel").hidden = name !== "error";
+  setPanelVisible(document.getElementById("processing-panel"), name === "processing");
+  setPanelVisible(document.getElementById("player-panel"), name === "player");
+  setPanelVisible(document.getElementById("idle-panel"), name === "idle");
+  setPanelVisible(document.getElementById("error-panel"), name === "error");
+}
+
+function formatDuration(seconds) {
+  if (!Number.isFinite(seconds) || seconds <= 0) return "—";
+  const total = Math.floor(seconds);
+  const h = Math.floor(total / 3600);
+  const m = Math.floor((total % 3600) / 60);
+  const s = total % 60;
+  if (h > 0) {
+    return `${h}:${String(m).padStart(2, "0")}:${String(s).padStart(2, "0")}`;
+  }
+  return `${m}:${String(s).padStart(2, "0")}`;
+}
+
+function updateVideoMeta(player) {
+  const metaEl = document.getElementById("video-meta");
+  if (!metaEl || !player.videoWidth) return;
+  metaEl.textContent = `${player.videoWidth}×${player.videoHeight} · ${formatDuration(player.duration)}`;
+}
+
+function setSubtitlesEnabled(enabled) {
+  const player = document.getElementById("player");
+  const toggleBtn = document.getElementById("subtitle-toggle");
+  const track = player?.textTracks?.[0];
+  if (track) {
+    track.mode = enabled ? "showing" : "hidden";
+  }
+  if (toggleBtn) {
+    toggleBtn.setAttribute("aria-pressed", enabled ? "true" : "false");
+    toggleBtn.classList.toggle("text-neutral-500", !enabled);
+    toggleBtn.classList.toggle("border-neutral-800/60", !enabled);
+  }
+}
+
+function bindPlayerControls() {
+  if (playerBound) return;
+
+  const player = document.getElementById("player");
+  const subtitleBtn = document.getElementById("subtitle-toggle");
+
+  player.addEventListener("loadedmetadata", () => updateVideoMeta(player));
+
+  subtitleBtn?.addEventListener("click", () => {
+    const track = player.textTracks[0];
+    setSubtitlesEnabled(track?.mode !== "showing");
+  });
+
+  playerBound = true;
 }
 
 function updateProcessingUI(episode) {
   const progress = Math.round((episode.progress || 0) * 100);
   document.getElementById("processing-bar").style.width = `${progress}%`;
   document.getElementById("processing-message").textContent =
-    episode.progressMessage || "İşlem devam ediyor...";
+    episode.progressMessage || "İşlem devam ediyor…";
+}
+
+function showProcessingState({ title = "Hazırlanıyor", message = "…", showProgress = true } = {}) {
+  document.getElementById("processing-title").textContent = title;
+  document.getElementById("processing-message").textContent = message;
+  document.getElementById("processing-spinner").hidden = false;
+  document.getElementById("processing-spinner").classList.remove("hidden");
+  document.getElementById("processing-progress-wrap").hidden = !showProgress;
+  document.getElementById("processing-progress-wrap").classList.toggle("hidden", !showProgress);
+  showPanel("processing");
 }
 
 async function rebuildEpisode(episodeId, { keepVideo = false } = {}) {
   const msg = keepVideo
     ? "Altyazılar silinip yeniden oluşturulacak (video korunur)."
     : "Tüm çıktılar silinip baştan oluşturulacak.";
-  if (!window.confirm(`${msg}\n\nDevam edilsin mi?`)) {
-    return null;
-  }
+  if (!window.confirm(`${msg}\n\nDevam edilsin mi?`)) return null;
 
   const res = await fetch(`/api/episodes/${encodeURIComponent(episodeId)}/rebuild`, {
     method: "POST",
@@ -56,23 +120,26 @@ async function startProcessing(episodeId) {
 
 async function fetchEpisode(episodeId) {
   const res = await fetch(`/api/episodes/${encodeURIComponent(episodeId)}`);
-  if (!res.ok) {
-    throw new Error("Bölüm bulunamadı");
-  }
+  if (!res.ok) throw new Error("Bölüm bulunamadı");
   return res.json();
 }
 
 function mountPlayer(episodeId) {
+  bindPlayerControls();
+
   const player = document.getElementById("player");
   const track = player.querySelector("track");
+
+  document.getElementById("video-meta").textContent = "";
   player.src = `/media/${encodeURIComponent(episodeId)}?t=${Date.now()}`;
   track.src = `/subs/${encodeURIComponent(episodeId)}/tr.vtt?t=${Date.now()}`;
   player.load();
+  setSubtitlesEnabled(true);
   showPanel("player");
 }
 
 async function pollUntilReady(episodeId) {
-  showPanel("processing");
+  showProcessingState();
   pollTimer = setInterval(async () => {
     try {
       const episode = await fetchEpisode(episodeId);
@@ -111,13 +178,15 @@ async function initWatchPage() {
   const episodeId = getEpisodeId();
   const titleEl = document.getElementById("episode-title");
   const statusEl = document.getElementById("episode-status");
-  const retryBtn = document.getElementById("retry-btn");
-  const rebuildBtn = document.getElementById("rebuild-btn");
 
-  retryBtn.addEventListener("click", () => runRebuild(episodeId));
-  if (rebuildBtn) {
-    rebuildBtn.addEventListener("click", () => runRebuild(episodeId));
-  }
+  showProcessingState({
+    title: "Yükleniyor",
+    message: "Bölüm bilgisi alınıyor…",
+    showProgress: false,
+  });
+
+  document.getElementById("retry-btn").addEventListener("click", () => runRebuild(episodeId));
+  document.getElementById("rebuild-btn")?.addEventListener("click", () => runRebuild(episodeId));
 
   try {
     episodeData = await fetchEpisode(episodeId);
@@ -141,6 +210,7 @@ async function initWatchPage() {
         await startProcessing(episodeId);
       }
       updateProcessingUI(episodeData);
+      showProcessingState();
       await pollUntilReady(episodeId);
       return;
     }
@@ -151,10 +221,7 @@ async function initWatchPage() {
       return;
     }
 
-    showPanel("processing");
-    document.getElementById("processing-title").textContent = "Bu bölüm henüz hazır değil";
-    document.getElementById("processing-message").textContent =
-      "Altyazıyı oluşturmak için ana listeden Hazırla'ya tıklayın.";
+    showPanel("idle");
   } catch (err) {
     titleEl.textContent = "Yükleme hatası";
     document.getElementById("error-message").textContent = String(err.message || err);

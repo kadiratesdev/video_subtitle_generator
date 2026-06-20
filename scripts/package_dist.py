@@ -8,10 +8,10 @@ import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
-DIST = ROOT / "dist" / "ElClon"
+DIST = ROOT / "dist" / "GenSub"
 
 KULLANIM = """
-El Clon — Türkçe Altyazı Platformu
+GenSub — Türkçe Altyazı Platformu
 ==================================
 
 KURULUM GEREKMİYOR
@@ -19,7 +19,7 @@ KURULUM GEREKMİYOR
   CUDA da gerekmez (Groq bulut API kullanılır).
 
 İLK ÇALIŞTIRMA
-  1. ElClon.exe dosyasını çift tıklayın (veya Calistir.bat)
+  1. GenSub.exe dosyasını çift tıklayın (veya Calistir.bat)
   2. Tarayıcı otomatik açılır: http://127.0.0.1:8765
   3. .env dosyasına GROQ_API_KEY ekleyin (yeni çeviri için zorunlu)
      Anahtar: https://console.groq.com
@@ -29,7 +29,7 @@ KLASÖRLER (exe ile aynı dizinde oluşur)
   output/   — altyazılar ve işlem durumu
 
 NOT
-  Tüm klasörü (ElClon.exe + _internal) birlikte kopyalayın.
+  Tüm klasörü (GenSub.exe + _internal) birlikte kopyalayın.
   Sadece exe dosyasını taşımayın.
 
 İSTEĞE BAĞLI — YEREL WHISPER (CUDA)
@@ -62,7 +62,7 @@ def main() -> int:
     launcher.write_text(
         "@echo off\n"
         "cd /d \"%~dp0\"\n"
-        "start \"\" \"ElClon.exe\"\n",
+        "start \"\" \"GenSub.exe\"\n",
         encoding="utf-8",
     )
     print(f"[OK] {launcher.name}")

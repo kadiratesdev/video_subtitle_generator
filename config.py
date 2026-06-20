@@ -68,19 +68,16 @@ class Config:
     def from_env(cls) -> "Config":
         output_dir = _path(os.getenv("OUTPUT_DIR", ""), ROOT / "output")
         videos_dir = _path(os.getenv("VIDEOS_DIR", ""), ROOT / "videos")
-        base_url = (
-            os.getenv("VIDEO_BASE_URL", "http://91.151.94.214:8080/videos/").strip()
-            or "http://91.151.94.214:8080/videos/"
-        )
-        if not base_url.endswith("/"):
+        base_url = os.getenv("VIDEO_BASE_URL", "").strip()
+        if base_url and not base_url.endswith("/"):
             base_url += "/"
 
-        source_raw = os.getenv("VIDEO_SOURCE", "remote").strip().lower()
+        source_raw = os.getenv("VIDEO_SOURCE", "local").strip().lower()
         video_source = "local" if source_raw == "local" else "remote"
         lang_raw = os.getenv("SOURCE_LANG", "es").strip().lower()
         source_lang = lang_raw if lang_raw in ("es", "en") else "es"
         local_dir_raw = os.getenv("LOCAL_VIDEO_DIR", "").strip()
-        local_video_dir = _path(local_dir_raw, ROOT / "videos") if local_dir_raw else None
+        local_video_dir = _path(local_dir_raw, videos_dir)
 
         return cls(
             video_base_url=base_url,

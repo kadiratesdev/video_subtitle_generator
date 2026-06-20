@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import threading
 import traceback
+from dataclasses import replace
 from typing import Any
 
 from catalog import Episode, fetch_episodes
@@ -57,6 +58,9 @@ class JobManager:
 
     def get_settings(self) -> CatalogSettings:
         return self.settings
+
+    def update_groq_api_key(self, api_key: str) -> None:
+        self.config = replace(self.config, groq_api_key=api_key.strip())
 
     def update_settings(
         self,

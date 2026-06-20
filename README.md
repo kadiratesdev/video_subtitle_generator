@@ -1,12 +1,12 @@
-# Video Subtitle Generator
+# GenSub
 
 Videolardan otomatik Türkçe altyazı üreten yerel web uygulaması. **İspanyolca** veya **İngilizce** kaynak videoları Groq API ile transkribe eder, Türkçeye çevirir ve tarayıcıda altyazılı oynatır.
 
 ## Özellikler
 
 - Web arayüzü ile video listesi, izleme ve işlem takibi
-- **Uzak kaynak:** HTTP üzerinden video dizini (URL listesi)
-- **Yerel klasör:** Bilgisayardaki videoları tarama ve klasör seçici
+- **Yerel klasör (varsayılan):** Proje içindeki `videos/` veya seçtiğiniz klasör
+- **Uzak kaynak (isteğe bağlı):** HTTP üzerinden video dizini (URL listesi)
 - Kaynak dil: İspanyolca (`es`) veya İngilizce (`en`)
 - İşlem durumu kaydı ve kaldığı yerden devam
 - **Yeniden oluştur:** Hatalı bölümleri sıfırdan işleme
@@ -60,9 +60,9 @@ python main.py process --episode bolum-001 --limit 1
 | Değişken | Açıklama |
 |----------|----------|
 | `GROQ_API_KEY` | Groq API anahtarı (yeni çeviri için zorunlu) |
-| `VIDEO_SOURCE` | `remote` veya `local` |
-| `VIDEO_BASE_URL` | Uzak video dizini URL |
-| `LOCAL_VIDEO_DIR` | Yerel video klasörü |
+| `VIDEO_SOURCE` | `local` (varsayılan) veya `remote` |
+| `VIDEO_BASE_URL` | Uzak video dizini URL (uzak mod için) |
+| `LOCAL_VIDEO_DIR` | Yerel video klasörü (varsayılan `videos`) |
 | `SOURCE_LANG` | `es` veya `en` |
 | `VIDEOS_DIR` | İndirilen videolar |
 | `OUTPUT_DIR` | Altyazı ve ara dosyalar |
@@ -77,7 +77,7 @@ Arayüzden kaynak ve dil değiştirilebilir; ayarlar `output/catalog-settings.js
 build.bat
 ```
 
-Çıktı: `dist/ElClon/` — tüm klasörü dağıtın. Kullanıcının Python veya ffmpeg kurmasına gerek yoktur.
+Çıktı: `dist/GenSub/` — tüm klasörü dağıtın. Kullanıcının Python veya ffmpeg kurmasına gerek yoktur.
 
 ## Klasör yapısı
 

@@ -20,15 +20,15 @@ LANG_LABELS = {"es": "İspanyolca", "en": "İngilizce"}
 
 @dataclass
 class CatalogSettings:
-    mode: SourceMode = "remote"
-    remote_url: str = "http://91.151.94.214:8080/videos/"
+    mode: SourceMode = "local"
+    remote_url: str = ""
     local_path: str = ""
     source_lang: SourceLang = "es"
 
     def normalized_remote_url(self) -> str:
         url = (self.remote_url or "").strip()
         if not url:
-            return "http://91.151.94.214:8080/videos/"
+            return ""
         return url if url.endswith("/") else f"{url}/"
 
     def local_dir(self) -> Path | None:
@@ -50,24 +50,26 @@ class CatalogSettings:
 
     @classmethod
     def from_dict(cls, data: dict[str, Any], *, config: Config) -> "CatalogSettings":
-        mode = data.get("mode", "remote")
+        mode = data.get("mode", "local")
         if mode not in ("remote", "local"):
-            mode = "remote"
+            mode = "local"
         lang = data.get("sourceLang", data.get("source_lang", "es"))
         if lang not in SUPPORTED_LANGS:
             lang = "es"
-        remote = data.get("remoteUrl") or data.get("remote_url") or config.video_base_url
-        local = data.get("localPath") or data.get("local_path") or ""
+        default_local = str(config.local_video_dir or config.videos_dir)
+        remote = data.get("remoteUrl") or data.get("remote_url") or config.video_base_url or ""
+        local = data.get("localPath") or data.get("local_path") or default_local
         return cls(mode=mode, remote_url=remote, local_path=local, source_lang=lang)
 
     @classmethod
     def from_config(cls, config: Config) -> "CatalogSettings":
         mode: SourceMode = "local" if config.video_source == "local" else "remote"
         lang = config.source_lang if config.source_lang in SUPPORTED_LANGS else "es"
+        default_local = str(config.local_video_dir or config.videos_dir)
         return cls(
             mode=mode,
-            remote_url=config.video_base_url,
-            local_path=str(config.local_video_dir or ""),
+            remote_url=config.video_base_url or "",
+            local_path=default_local,
             source_lang=lang,
         )
 

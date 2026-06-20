@@ -30,3 +30,6 @@ Thumbs.db
 # Geçici
 *.log
 *.tmp
+
+# Node (Tailwind derleme)
+node_modules/

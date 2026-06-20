@@ -5,12 +5,18 @@ from __future__ import annotations
 
 from pathlib import Path
 
-from ffmpeg_util import ensure_parent, run_ffmpeg
+from ffmpeg_util import NoAudioStreamError, ensure_parent, run_ffmpeg, video_has_audio
 
 
 def extract_audio(video_path: Path, output_path: Path) -> Path:
     if output_path.exists() and output_path.stat().st_size > 0:
         return output_path
+
+    if not video_has_audio(video_path):
+        raise NoAudioStreamError(
+            "Bu videoda ses kanalı yok. Instagram/indirme araçları bazen sessiz kopya üretir; "
+            "sesli orijinal dosyayı kullanın veya videoya ses ekleyin."
+        )
 
     ensure_parent(output_path)
     suffix = output_path.suffix.lower()
