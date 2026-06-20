@@ -1,0 +1,32 @@
+# Ortam ve gizliler
+.env
+*.env.local
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+env/
+
+# Derleme ve dağıtım
+dist/
+build/
+*.spec.bak
+
+# Kullanıcı verisi
+output/
+videos/
+*.part
+
+# IDE / OS
+.idea/
+.vscode/
+.cursor/
+.DS_Store
+Thumbs.db
+
+# Geçici
+*.log
+*.tmp

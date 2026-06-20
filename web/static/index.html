@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>El Clon — Türkçe Altyazı</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+  <div class="app-shell">
+    <aside class="sidebar">
+      <div class="brand">
+        <div class="brand-mark">EC</div>
+        <div>
+          <h1>El Clon</h1>
+          <p>Türkçe altyazı platformu</p>
+        </div>
+      </div>
+
+      <div class="stats-grid" id="stats-grid">
+        <div class="stat-card">
+          <span class="stat-label">Toplam</span>
+          <strong id="stat-total">—</strong>
+        </div>
+        <div class="stat-card accent">
+          <span class="stat-label">Hazır</span>
+          <strong id="stat-ready">—</strong>
+        </div>
+        <div class="stat-card">
+          <span class="stat-label">Bekleyen</span>
+          <strong id="stat-pending">—</strong>
+        </div>
+      </div>
+
+      <div class="sidebar-note" id="api-warning" hidden>
+        <strong>Groq API anahtarı yok</strong>
+        <p>Yeni çeviri başlatmak için .env dosyasına GROQ_API_KEY ekleyin.</p>
+      </div>
+
+      <section class="source-panel" id="source-panel">
+        <h2>Video kaynağı</h2>
+        <label class="field-label" for="source-mode">Kaynak türü</label>
+        <select id="source-mode" class="source-input">
+          <option value="remote">Uzak sunucu (URL)</option>
+          <option value="local">Yerel klasör</option>
+        </select>
+
+        <div id="remote-fields">
+          <label class="field-label" for="remote-url">Sunucu adresi</label>
+          <input id="remote-url" type="url" class="source-input" placeholder="http://.../videos/">
+        </div>
+
+        <div id="local-fields" hidden>
+          <label class="field-label" for="local-path">Klasör yolu</label>
+          <input id="local-path" type="text" class="source-input" placeholder="C:\Videos">
+          <button type="button" class="btn ghost full" id="pick-folder-btn">Klasör seç…</button>
+        </div>
+
+        <label class="field-label" for="source-lang">Kaynak dil</label>
+        <select id="source-lang" class="source-input">
+          <option value="es">İspanyolca → Türkçe</option>
+          <option value="en">İngilizce → Türkçe</option>
+        </select>
+
+        <button type="button" class="btn primary full" id="apply-source-btn">Kaynağı uygula</button>
+        <p class="source-hint" id="source-hint"></p>
+      </section>
+
+      <div class="current-job" id="current-job" hidden>
+        <span class="pulse"></span>
+        <div>
+          <strong>İşleniyor</strong>
+          <p id="current-job-name"></p>
+        </div>
+      </div>
+    </aside>
+
+    <main class="main-panel">
+      <header class="toolbar">
+        <div class="search-wrap">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+            <circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="2"/>
+            <path d="M20 20L16 16" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+          </svg>
+          <input id="search" type="search" placeholder="Video veya bölüm ara..." autocomplete="off">
+        </div>
+
+        <div class="toolbar-actions">
+          <select id="filter-status" aria-label="Durum filtresi">
+            <option value="all">Tümü</option>
+            <option value="ready">Hazır</option>
+            <option value="pending">Bekleyen</option>
+            <option value="processing">İşleniyor</option>
+            <option value="failed">Başarısız</option>
+          </select>
+          <button type="button" class="btn ghost" id="refresh-btn">Yenile</button>
+        </div>
+      </header>
+
+      <section id="episode-list" class="episode-grid" aria-live="polite"></section>
+    </main>
+  </div>
+
+  <script src="/static/app.js"></script>
+</body>
+</html>

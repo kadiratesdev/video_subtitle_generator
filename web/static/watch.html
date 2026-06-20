@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Bölüm İzle — El Clon</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body class="watch-body">
+  <header class="watch-header">
+    <a href="/" class="back-link">← Bölümlere dön</a>
+    <div class="watch-title-wrap">
+      <h1 id="episode-title">Bölüm</h1>
+      <p id="episode-status" class="watch-status"></p>
+    </div>
+  </header>
+
+  <main class="watch-main">
+    <div id="processing-panel" class="processing-panel" hidden>
+      <div class="processing-ring"></div>
+      <h2 id="processing-title">Altyazı hazırlanıyor</h2>
+      <p id="processing-message">Video indiriliyor...</p>
+      <div class="progress-track">
+        <div id="processing-bar" class="progress-fill"></div>
+      </div>
+      <p class="processing-hint">Bu işlem bir kez yapılır. Sonraki izlemelerde anında açılır.</p>
+    </div>
+
+    <div id="player-panel" class="player-panel" hidden>
+      <div class="player-toolbar">
+        <button type="button" class="btn ghost" id="rebuild-btn">Yeniden oluştur</button>
+      </div>
+      <video id="player" controls preload="metadata" crossorigin="anonymous" playsinline>
+        <track kind="subtitles" src="" srclang="tr" label="Türkçe" default>
+        Tarayıcınız video oynatmayı desteklemiyor.
+      </video>
+    </div>
+
+    <div id="error-panel" class="error-panel" hidden>
+      <h2>Bir sorun oluştu</h2>
+      <p id="error-message"></p>
+      <div class="error-actions">
+        <button type="button" class="btn primary" id="retry-btn">Yeniden oluştur</button>
+      </div>
+    </div>
+  </main>
+
+  <script src="/static/watch.js"></script>
+</body>
+</html>
