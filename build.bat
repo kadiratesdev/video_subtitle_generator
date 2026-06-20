@@ -37,9 +37,14 @@ if errorlevel 1 (
   exit /b 1
 )
 
+echo [5/5] Release zip (istege bagli)...
+python scripts\package_release.py
+if errorlevel 1 (
+  echo [UYARI] Release zip olusturulamadi.
+)
+
 echo.
-echo [5/5] Tamamlandi!
-echo.
+echo Tamamlandi!
 echo   dist\GenSub\ klasorunu kullaniciya verin.
 echo   Calistir.bat veya GenSub.exe ile baslatilir.
 echo   .env icine GROQ_API_KEY eklemeyi unutmayin.

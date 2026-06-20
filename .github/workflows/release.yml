@@ -1,0 +1,44 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: write
+
+jobs:
+  build-windows:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Build UI
+        run: npm ci && npm run build:ui
+
+      - name: Install Python deps
+        run: python -m pip install -r requirements.txt pyinstaller
+
+      - name: Build EXE
+        run: pyinstaller --noconfirm --clean GenSub.spec
+
+      - name: Prepare dist folder
+        run: python scripts/package_dist.py
+
+      - name: Create release zip
+        run: python scripts/package_release.py -o dist/release/GenSub-windows-x64.zip
+
+      - name: Publish GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: dist/release/GenSub-windows-x64.zip
+          generate_release_notes: true
