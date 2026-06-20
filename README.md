@@ -73,40 +73,9 @@ Arayüzden kaynak ve dil değiştirilebilir; ayarlar `output/catalog-settings.js
 
 ## Windows EXE
 
-```bash
-build.bat
-```
+Hazır paket: [Releases](https://github.com/kadiratesdev/video_subtitle_generator/releases)
 
-Çıktı: `dist/GenSub/` — tüm klasörü dağıtın. Kullanıcının Python veya ffmpeg kurmasına gerek yoktur.
-
-Release zip: `dist/release/GenSub-windows-x64.zip` (`python scripts/package_release.py`)
-
-### GitHub Release
-
-1. Değişiklikleri `main` branch'e push edin
-2. Sürüm etiketi oluşturup gönderin:
-
-```bash
-git tag v1.0.0
-git push origin v1.0.0
-```
-
-GitHub Actions Windows'ta EXE derler, zip oluşturur ve [Releases](https://github.com/kadiratesdev/video_subtitle_generator/releases) sayfasına yükler.
-
-Yerelde manuel paket için: `build.bat` ardından `gh release create v1.0.0 dist/release/GenSub-windows-x64.zip --generate-notes`
-
-## Klasör yapısı
-
-```
-videos/                 # İndirilen / kopyalanan videolar
-output/
-  <video-stem>/
-    audio.mp3
-    es.srt | en.srt
-    tr.srt
-  pipeline-state.json
-  catalog-settings.json
-```
+Kaynak koddan derlemek için: `build.bat`
 
 ## Lisans
 
